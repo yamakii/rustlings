@@ -25,18 +25,18 @@ impl FromStr for Person {
     type Err = Box<dyn error::Error>;
     fn from_str(s: &str) -> Result<Person, Self::Err> {
         let mut data = s.split(",");
-        let name = data.next().map(|x| {
+        let name = data.next().and_then(|x| {
             if x.len() != 0 {
                 Some(x.to_string())
             } else {
                 None
             }
         });
-        let age = data.next().map(|x| Some(x.parse::<usize>().ok()?));
+        let age = data.next().and_then(|x| Some(x.parse::<usize>().ok()?)); // ?による早期リターンを使いたいので、あえて明示的にSomeで囲う
         let other = data.next();
 
         match (name, age, other) {
-            (Some(Some(x)), Some(Some(y)), None) => Ok(Person { name: x, age: y }),
+            (Some(x), Some(y), None) => Ok(Person { name: x, age: y }),
             _ => Err(Box::new(std::fmt::Error)),
         }
     }
